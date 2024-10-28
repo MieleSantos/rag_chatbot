@@ -5,6 +5,10 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains.retrieval import create_retrieval_chain
 
 
 def temp_file_save(file):
@@ -60,7 +64,10 @@ def load_existing_vector_store(persist_directory):
         return vector_store
     return None
 
+
+
 def select_model():  
+
     model_options = [
         'gpt-3.5-turbo',
         'gpt-4',
@@ -70,3 +77,46 @@ def select_model():
     ]
 
     return model_options
+
+# def prompt(context):
+#     system_prompt='''
+#         Use o contexto para responder as perguntas.
+#         Se não encontrar uma resposta no contexto,
+#         explique que não há informações disponiveis.
+#         Responda em formtato de mmarkdown e com visualizações
+#         elaboradas e interativas.
+#         Contexto: {context}
+#     '''
+def ask_question(model,query,vector_store,st):
+    
+    llm = ChatOpenAI(model=model)
+    
+    retriever = vector_store.as_retriever()
+    
+    system_prompt='''
+        Use o contexto para responder as perguntas.
+        Se não encontrar uma resposta no contexto,
+        explique que não há informações disponiveis.
+        Responda em formtato de mmarkdown e com visualizações
+        elaboradas e interativas.
+        Contexto: {context}
+    '''
+    # primeira mensagem
+    messages = [("system",system_prompt)]
+    # historico ded mensagens
+    for message in st.session_state.messages:
+        messages.append((message.get('role'),message.get('content')))
+    # ultima mensagem
+    messages.append(('human','{input}'))
+    
+    prompt = ChatPromptTemplate.from_messages(messages)
+    
+    question_answer_chain = create_stuff_documents_chain(
+        llm=llm,prompt=prompt
+    )
+    
+    chain = create_retrieval_chain(retriever=retriever,combine_docs_chain=question_answer_chain)
+    
+   
+    response = chain.invoke({'input': query})
+    return response.get('answer'),st
