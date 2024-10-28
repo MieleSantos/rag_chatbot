@@ -38,14 +38,15 @@ def create_chunks(docs):
     return chunks
 
 
-def add_to_vector_store(chunks, persist_directory, vector_store=None):
+def add_to_vector_store( persist_directory,chunks, vector_store=None):
     if vector_store:
         vector_store.add_documents(chunks)
     else:
         vector_store = Chroma.from_documents(
             documents=chunks,
+            embedding=OpenAIEmbeddings(),
             persist_directory=persist_directory,
-            embedding_function=OpenAIEmbeddings(),
+            
         )
     return vector_store
 
@@ -58,3 +59,14 @@ def load_existing_vector_store(persist_directory):
         )
         return vector_store
     return None
+
+def select_model():  
+    model_options = [
+        'gpt-3.5-turbo',
+        'gpt-4',
+        'gpt-4-turbo',
+        'gpt-4o-mini',
+        'gpt-4o',
+    ]
+
+    return model_options

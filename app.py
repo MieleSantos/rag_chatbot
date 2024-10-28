@@ -1,9 +1,13 @@
+import os
 import streamlit as st
 
-from agent import select_model
-from process_data import add_to_vector_store, load_existing_vector_store, process_pdf
+# from agent import select_model
+from process_data import add_to_vector_store, load_existing_vector_store, process_pdf,select_model
+from dotenv import load_dotenv
+load_dotenv()
 
-persist_directory = 'db'
+os.environ['OPENAI_API_KEY'] = os.getenv('API_KEY')
+persist_directory = 'database/db'
 vector_store = load_existing_vector_store(persist_directory)
 
 st.set_page_config(
@@ -24,7 +28,7 @@ with st.sidebar:
                 chunks = process_pdf(file=upload_file)
                 all_chunks.extend(chunks)
             vector_store = add_to_vector_store(
-                chunks=all_chunks, vector_store=vector_store
+                persist_directory,chunks=all_chunks,vector_store=vector_store
             )
 
     selected_model = st.sidebar.selectbox(
