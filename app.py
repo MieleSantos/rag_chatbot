@@ -2,7 +2,7 @@ import os
 
 import streamlit as st
 
-from agent import select_model, ask_question_vector
+from agent import select_model, ask_question_vector,ChatbotRag
 from repository.process_data import CreateChunks, PDFRepository
 from repository.vector_repository import VectorRepository
 

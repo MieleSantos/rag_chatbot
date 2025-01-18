@@ -83,6 +83,14 @@ def chatbot_query(question, modelo):
 
 
 def ask_question_vector(model, query, vector_store, st):
+    api_key = os.getenv('API_KEY')
+
+    if not api_key:
+        raise ValueError(
+            "A chave da API 'API_KEY' não foi encontrada nas variáveis de ambiente."
+        )
+    os.environ['OPENAI_API_KEY'] = api_key
+    
     llm = ChatOpenAI(model=model)
 
     retriever = vector_store.as_retriever()

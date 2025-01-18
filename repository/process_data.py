@@ -5,24 +5,26 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 
 
+def temp_file_save(file):
+    """
+        Recebe um arquivo em binario e salva no diretorio temporario
+    Args:
+        file (_type_): Arquivo binario do pdf
+
+    Returns:
+        _type_: path do arquivo gerado
+    """
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
+        temp_file.write(file.read())
+        temp_file_path = temp_file.name
+        return temp_file_path
+
 class PDFRepository:
+
+
     @classmethod
-    def temp_file_save(file):
-        """
-            Recebe um arquivo em binario e salva no diretorio temporario
-        Args:
-            file (_type_): Arquivo binario do pdf
-
-        Returns:
-            _type_: path do arquivo gerado
-        """
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
-            temp_file.write(file.read())
-            temp_file_path = temp_file.name
-            return temp_file_path
-
-    def load_pdf(cls, file):
-        path_file = cls.temp_file_save(file)
+    def load_pdf(self, file):
+        path_file =temp_file_save(file)
 
         loader = PyPDFLoader(path_file)
         docs = loader.load()
@@ -34,7 +36,7 @@ class PDFRepository:
 
 class CreateChunks:
     @classmethod
-    def create_chunks(docs):
+    def create_chunks(self,docs):
         text_spliter = RecursiveCharacterTextSplitter(
             chunk_size=1000, chunk_overlap=400
         )
