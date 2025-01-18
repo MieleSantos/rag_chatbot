@@ -1,10 +1,11 @@
 import streamlit as st
 
 from agent import select_model
-from process_data import add_to_vector_store, load_existing_vector_store, process_pdf
+from database.config import get_database
+from repository.process_data import CreateChunks, PDFRepository
+from repository.vector_repository import VectorRepository
 
-persist_directory = 'db'
-vector_store = load_existing_vector_store(persist_directory)
+vector_store = VectorRepository.load_existing_vector_store(get_database())
 
 st.set_page_config(
     page_title='Chat PyGPT',
@@ -21,9 +22,10 @@ with st.sidebar:
         with st.spinner('Processando documentos...'):
             all_chunks = []
             for upload_file in upload_files:
-                chunks = process_pdf(file=upload_file)
+                docs = PDFRepository.load_pdf(file=upload_file)
+                chunks = CreateChunks.create_chunks(docs)
                 all_chunks.extend(chunks)
-            vector_store = add_to_vector_store(
+            vector_store = VectorRepository.add_to_vector_store(
                 chunks=all_chunks, vector_store=vector_store
             )
 
