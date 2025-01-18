@@ -3,11 +3,10 @@ import os
 import streamlit as st
 
 from agent import select_model, ask_question_vector
-from database.config import get_database
 from repository.process_data import CreateChunks, PDFRepository
 from repository.vector_repository import VectorRepository
 
-vector_store = VectorRepository.load_existing_vector_store(get_database())
+vector_store = VectorRepository.load_existing_vector_store()
 
 st.set_page_config(
     page_title='Chat PyGPT',

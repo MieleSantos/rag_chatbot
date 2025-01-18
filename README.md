@@ -98,3 +98,5 @@ O RAG é amplamente utilizado em chatbots avançados e sistemas de suporte ao cl
 ## Contribuições
 
 Contribuições são bem-vindas! Sinta-se à vontade para abrir problemas e pull requests para melhorias no projeto.
+
+

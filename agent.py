@@ -10,8 +10,7 @@ from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
-from database.config import get_database
-
+from repository.database.config import get_database
 
 class ChatbotRag:
     def __init__(self, modelo: str):
