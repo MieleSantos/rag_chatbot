@@ -3,8 +3,11 @@ import os
 from dotenv import load_dotenv
 from langchain import hub
 from langchain.agents import AgentExecutor, create_react_agent
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains.retrieval import create_retrieval_chain
 from langchain.prompts import PromptTemplate
 from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
 from database.config import get_database
@@ -78,3 +81,36 @@ def select_model():  # noqa: PLR6301
 def chatbot_query(question, modelo):
     assistent = ChatbotRag(modelo=modelo)
     return assistent.search_assistent(question)
+
+
+def ask_question_vector(model, query, vector_store, st):
+    llm = ChatOpenAI(model=model)
+
+    retriever = vector_store.as_retriever()
+
+    system_prompt = """
+        Use o contexto para responder as perguntas.
+        Se não encontrar uma resposta no contexto,
+        explique que não há informações disponiveis.
+        Responda em formtato de mmarkdown e com visualizações
+        elaboradas e interativas.
+        Contexto: {context}
+    """
+    # primeira mensagem
+    messages = [('system', system_prompt)]
+    # historico ded mensagens
+    for message in st.session_state.messages:
+        messages.append((message.get('role'), message.get('content')))
+    # ultima mensagem
+    messages.append(('human', '{input}'))
+
+    prompt = ChatPromptTemplate.from_messages(messages)
+
+    question_answer_chain = create_stuff_documents_chain(llm=llm, prompt=prompt)
+
+    chain = create_retrieval_chain(
+        retriever=retriever, combine_docs_chain=question_answer_chain
+    )
+
+    response = chain.invoke({'input': query})
+    return response.get('answer'), st
